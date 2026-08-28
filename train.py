@@ -168,4 +168,8 @@ with open(os.path.join(OUTPUT_DIR, "classification_report.txt"), "w") as f:
     f.write(report)
 
 print(report)
+<<<<<<< HEAD
 print(f"\nAll artifacts saved to ./{OUTPUT_DIR}/")
+=======
+print(f"\nAll artifacts saved to ./{OUTPUT_DIR}/")
+>>>>>>> 89e797671ef1c9c3ba2d82e975721144d047c8dc
