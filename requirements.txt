@@ -1,6 +1,6 @@
-streamlit
-tensorflow
-numpy
-scikit-learn
-matplotlib
-pillow
+streamlit==1.49.1
+tensorflow==2.19.0
+numpy==2.1.3
+scikit-learn==1.7.1
+matplotlib==3.10.5
+pillow==11.3.0
