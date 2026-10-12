@@ -8,21 +8,21 @@ Assign one of 10 labels — airplane, automobile, bird, cat, deer, dog, frog, ho
 
 ## Approach
 
-- **Data**: CIFAR-10 (60,000 32×32 color images, 10 balanced classes). Split into 45,000 train / 5,000 validation / 10,000 test — the test set is only touched once, for final evaluation.
+- **Data**: CIFAR-10 (60,000 32×32 color images, 10 balanced classes). Split into 45,000 train / 5,000 validation / 10,000 test. Training callbacks monitor validation loss. The comparison below reports test results from two iterations, so this is not a one-time untouched-test evaluation.
 - **Augmentation**: random rotation, width/height shift, horizontal flip, and zoom applied to training data only, to reduce overfitting on such small images.
 - **Architecture**: 3 convolutional blocks (32 → 64 → 128 filters) with BatchNormalization and MaxPooling after each, followed by a dense classification head with Dropout.
 - **Training**: Adam optimizer (learning rate 5e-4) with label smoothing (0.1) in the categorical cross-entropy loss, plus `EarlyStopping`, `ReduceLROnPlateau`, and `ModelCheckpoint` callbacks so training stops and saves automatically at the best validation loss rather than a fixed epoch count.
 
 ## Results
 
-Trained in two iterations — the first run surfaced a specific failure mode, which the second run fixed.
+The earlier README reported two training iterations. The current checked-in [classification report](outputs/classification_report.txt) records **80.28% test accuracy** on 10,000 images. Baseline values below are retained as historical reported results; they have not been independently reproduced here.
 
 | Metric | v1 (baseline) | v2 (tuned) |
 |---|---|---|
-| Test accuracy | 77.48% | **80.00%** |
+| Test accuracy | 77.48% | **80.28%** |
 | Macro avg F1 | 0.77 | 0.80 |
 
-**What changed between v1 and v2:** v1's confusion matrix showed "frog" acting as a catch-all bucket — 96% recall but only 59% precision, with hundreds of birds, cats, and deer misclassified as frog. Since all classes are perfectly balanced (1,000 images each), this was a model-confidence issue, not a data issue. Lowering the learning rate (1e-3 → 5e-4) and adding label smoothing (0.1) in the loss function fixed it: frog's precision rose to 0.62, and every class most affected by frog-confusion improved — cat's recall went from 0.49 to 0.58, bird's F1 from 0.65 to 0.70.
+**Changes reported between iterations:** the learning rate was reduced from 1e-3 to 5e-4 and label smoothing (0.1) was added. The current report shows frog precision of 0.62 and recall of 0.96, so confusion remains substantial. These runs changed multiple settings together; they do not isolate the effect of label smoothing, establish the cause of the errors, or show that the failure mode was fixed.
 
 | Class | v1 F1 | v2 F1 |
 |---|---|---|
@@ -75,12 +75,17 @@ Training runs for up to 60 epochs but stops early once validation loss stops imp
 streamlit run app.py
 ```
 
+## Evaluation limitations
+
+The test results were compared across iterations, and the earlier narrative describes using test errors to guide changes. Treat these scores as development results rather than an unbiased final estimate after model selection. For the next experiment, choose settings using validation data only, preserve run configurations and seeds, and evaluate the selected model on a fresh held-out dataset. Softmax scores are not calibrated guarantees, and uploaded images may differ substantially from CIFAR-10.
+
 ## Possible Extensions
 
-- Swap the from-scratch CNN for a pretrained backbone (e.g. `MobileNetV2` or `ResNet50` via transfer learning) — usually pushes CIFAR-10 test accuracy well past 90% with far less training.
+- Swap the from-scratch CNN for a pretrained backbone (e.g. `MobileNetV2` or `ResNet50` via transfer learning) and compare validation performance, training cost and preprocessing requirements before reporting a new measured test result.
 - Deploy the Streamlit app publicly (Streamlit Community Cloud) for a live demo link.
 - Try CIFAR-100 or a custom-scraped dataset to move past the standard benchmark.
 
 ## Author
 
 **Qamareen Fatima**
+
